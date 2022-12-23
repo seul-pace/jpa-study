@@ -17,7 +17,8 @@ public class ItemRepository {
         if (item.getId() == null) {
             em.persist(item);
         } else {
-            em.merge(item);
+            em.merge(item); // 준영속 -> 아이디 찾아서 모든 데이터 바꿔치기
+            // 여기서 반환된 값만 영속성 상태 (item은 영속 ㄴㄴ)
         }
     }
 

@@ -62,16 +62,19 @@ public class ItemController {
     }
 
     @PostMapping("items/{itemId}/edit")
-    public String updateItem(@ModelAttribute("form") BookForm form) { // 이름이 그대로 넘어오니까 받아줄 수 있도록
-        Book book = new Book();
-        book.setId(form.getId());
-        book.setIsbn(form.getIsbn());
-        book.setAuthor(form.getAuthor());
-        book.setStockQuantity(form.getStockQuantity());
-        book.setPrice(form.getPrice());
-        book.setName(form.getName());
+    public String updateItem(@PathVariable Long itemId, @ModelAttribute("form") BookForm form) { // 이름이 그대로 넘어오니까 받아줄 수 있도록
+        // form은 웹 계층에서만 사용한다고 생각하고 넘길 수가 없어서 Book을 만들어서 넘겼음
+//        Book book = new Book();
+//        book.setId(form.getId());
+//      // 객체는 새 거지만, id는 세팅됨 -> jpa 에서 한 번이라도 들어갔다 나온 애... -> 준영속 상태 객체 (jpa가 관리하지 않음)
+//        book.setIsbn(form.getIsbn());
+//        book.setAuthor(form.getAuthor());
+//        book.setStockQuantity(form.getStockQuantity());
+//        book.setPrice(form.getPrice());
+//        book.setName(form.getName());
+//        itemService.saveItem(book);
 
-        itemService.saveItem(book);
+        itemService.updateItem(itemId, form.getName(), form.getPrice(), form.getStockQuantity());
         return "redirect:/items";
     }
 }
