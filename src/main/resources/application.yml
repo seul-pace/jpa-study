@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none # create 계속 지우고 새로 만든다
     properties:
       hibernate:
 #        show_sql: true
