@@ -26,6 +26,15 @@ public class Order {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    // fetch = LAZY
+    // order를 부를 때는 member를 가져오지 않는다. -> 초기화를 해줘야 하는데? Proxy로 생성한 ByteBuddyInterceptor로 채워줌
+    // 그리고 실제로 member 데이터를 불러올 때, 그때 조회를 해온다.
+    // 그래서 조회하려고 했더니 json이 불러오지 못 해서 500 에러 발생
+    // -> Hibernate5Module 라이브러리 추가하여 관리할 수 있게 하면, lazy 로딩 값은 전부 null 뜸
+
+    // 근데 EAGER로 변경하면,
+    // 필요가 없는 경우에도 조회하기 때문에 성능이 느려짐
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL) // 한꺼번에 저장하고 한꺼번에 지우고
     private List<OrderItem> orderItems = new ArrayList<>();
 
