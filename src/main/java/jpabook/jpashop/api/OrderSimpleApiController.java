@@ -58,6 +58,19 @@ public class OrderSimpleApiController {
        return result;
     }
 
+    @GetMapping("/api/v3/simple-orders")
+    public List<SimpleOrderDto> ordersV3() {
+        List<Order> orders = orderRepository.findAllWithMemberDelivery(); // fetch join 사용 기가 맥힌다..
+
+        List<SimpleOrderDto> result = orders.stream()
+                .map(SimpleOrderDto::new)
+                .collect(Collectors.toList());
+        return result;
+
+        // 이렇게 하면 쿼리가 한 번만 날아감
+        // 근데 필요 없다고 생각하는 애까지 끌고 오네..
+    }
+
     @Data
     static class SimpleOrderDto {
         private Long orderId;
