@@ -5,6 +5,8 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryDto;
+import jpabook.jpashop.repository.order.simplequery.OrderSimpleQueryRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public class OrderSimpleApiController {
 
     private final OrderRepository orderRepository;
+    private final OrderSimpleQueryRepository orderSimpleQueryRepository;
 
     @GetMapping("/api/v1/simple-orders")
     public List<Order> ordersV1() {
@@ -71,7 +74,15 @@ public class OrderSimpleApiController {
         // 근데 필요 없다고 생각하는 애까지 끌고 오네..
     }
 
-    @Data
+    // 3번은 코드가 깔끔해지고,
+    // 4번은 쿼리 성능이 좋다
+
+    @GetMapping("/api/v4/simple-orders")
+    public List<OrderSimpleQueryDto> ordersV4() {
+        return orderSimpleQueryRepository.findOrderDtos();
+    }
+
+   @Data
     static class SimpleOrderDto {
         private Long orderId;
         private String name;
