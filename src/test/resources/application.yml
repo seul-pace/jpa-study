@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8080
 
 spring:
 # 지워도 메모리로 동작함 (springboot 최고)
