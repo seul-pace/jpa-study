@@ -114,4 +114,14 @@ public class OrderRepository {
 
         // 필요한 값을 다 가져와서 한꺼번에 불러오기
     }
+
+    public List<Order> findAllWithItem() {
+        return em.createQuery(
+                "select distinct o from Order o" +
+                        " join fetch o.member m" +
+                        " join fetch o.delivery d" +
+                        " join fetch o.orderItems oi" +
+                        " join fetch oi.item i", Order.class)
+                .getResultList();
+    }
 }

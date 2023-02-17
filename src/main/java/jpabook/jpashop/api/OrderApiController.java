@@ -48,6 +48,25 @@ public class OrderApiController {
         return result;
     }
 
+    @GetMapping("/api/v3/orders")
+    public List<OrderDto> ordersV3() {
+        List<Order> orders = orderRepository.findAllWithItem();
+        // DB 입장에서는 join을 했기 때문에 똑같은 주문이 2건 나온다
+        // JPA는 판단하지 못 하고, DB가 전해준대로 보여준다
+        // 1:n 관계가 있어 쿼리가 많이 날아가니까 개선하자..!
+
+        // => 그래서~~~ 쿼리에 distinct를 넣는다
+        // 근데 db에서 distinct는 뭐 하나라도 다르면 중복이 아니라고 생각하거든요
+        // 근데 JPA에서 자체적으로 distinct가 있으면 Order가 같은 id 값이면 중복을 제거해준다
+
+        // 근데 1:n을 페치조인 하는 순간
+        // ** 페이징이 안 된다 **
+        List<OrderDto> result = orders.stream()
+                .map(o -> new OrderDto(o))
+                .collect(Collectors.toList());
+        return result;
+    }
+
     @Getter
     static class OrderDto {
 
