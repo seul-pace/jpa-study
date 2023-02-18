@@ -15,6 +15,7 @@ spring:
       hibernate:
 #        show_sql: true
         format_sql: true
+        default_batch_fetch_size: 100 # in 쿼리를 몇 개까지 할 건가요? (ex. 총 데이터 100갠데 10으로 하면 10번 쿼리 돌림)
 
 logging:
   level:

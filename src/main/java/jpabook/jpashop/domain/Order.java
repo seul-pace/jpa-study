@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -35,6 +36,7 @@ public class Order {
     // 근데 EAGER로 변경하면,
     // 필요가 없는 경우에도 조회하기 때문에 성능이 느려짐
 
+//    @BatchSize(size = 1000) 컬렉션에 적용할 때는 이렇게 (개별 최적화)
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL) // 한꺼번에 저장하고 한꺼번에 지우고
     private List<OrderItem> orderItems = new ArrayList<>();
 

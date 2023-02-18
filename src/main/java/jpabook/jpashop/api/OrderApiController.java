@@ -9,6 +9,7 @@ import jpabook.jpashop.repository.OrderSearch;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -20,6 +21,14 @@ import java.util.stream.Collectors;
 public class OrderApiController {
 
     private final OrderRepository orderRepository;
+
+    /*
+    흐름
+    1) entity 조회, orderItem을 지연 로딩으로 가져와서 Order로 돌려줌
+    2) 그건 위험해! Dto로 감싸자~ 이렇게 했더니 연결된 거 다 따로 쿼리를 더 돌리네...
+    3) 그럼 fetchJoin으로 한번에 가져오자 -> 이렇게 했더니 1:n은 n을 기준으로 가져와서 중복된 데이터가 나오네? 머여 페이징도 못 하네
+    4) 하... 그럼 fetchJoin으로 일단 1:1만 가져와! 그리고 default_batch_fetch_size를 이용해서 한꺼번에 쿼리 날리자
+     */
 
     @GetMapping("/api/v1/orders")
     public List<Order> ordersV1() {
@@ -65,6 +74,34 @@ public class OrderApiController {
                 .map(o -> new OrderDto(o))
                 .collect(Collectors.toList());
         return result;
+    }
+
+    /**
+     * 많은 데이터를 페이징 처리 하면서 가져와야 하는데,
+     * 다(N)를 기준으로 row가 생성된다
+     * 하이버네이트는 DB데이터를 기준으로 메모리에서 페이징을 시도
+     * -> 개선 필요
+     */
+    @GetMapping("/api/v3.1/orders")
+    public List<OrderDto> ordersV3_page(
+            @RequestParam(value = "offset", defaultValue = "0") int offset,
+            @RequestParam(value = "limit", defaultValue = "100") int limit)
+    {
+        // ToOne 관계는 다 fetchJoin으로 가져오기 -> 페이징에 영향을 주지 않음
+        List<Order> orders = orderRepository.findAllWithMemberDelivery(offset, limit);
+
+        // 그리고 이거 부를 때 application.yml 내 betchSize 옵션을 줘서, 가져올 때 in 쿼리로 가져와서 적게 쿼리 날림
+        // 하이버네이트 대단한 놈임
+        // 1:n:m을 1:1:1로 바꿔주는~
+        List<OrderDto> result = orders.stream()
+                .map(o -> new OrderDto(o))
+                .collect(Collectors.toList());
+        return result;
+
+        // 참고로 batchSize는 100~1000으로 추천하는데,
+        // 1000으로 하면 한번에 가져올 때 부하가 많이 온다...
+        // 그렇다고 너무 적게 돌면 시간이 오래 걸리겠지?
+        // 적정한.. 개수를 하자 (was랑 db가 순간 부하를 버틸 수 있다면 1000)
     }
 
     @Getter

@@ -6,11 +6,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
 
 import static javax.persistence.FetchType.LAZY;
 
+//@BatchSize(size = 100) // 만약 collection이 아니라 1:1이면 이런 식으로 해당 클래스에 적어주어야 한다
 @Entity
 @Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
