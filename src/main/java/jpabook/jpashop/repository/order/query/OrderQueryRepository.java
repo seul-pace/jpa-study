@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -44,5 +46,47 @@ public class OrderQueryRepository {
                         " join o.member m" +
                         " join o.delivery d", OrderQueryDto.class)
                 .getResultList();
+    }
+
+    /**
+     * root 1번, collection 1번
+     * toMany 관계를 한꺼번에 조회하고~
+     * map을 사용해서 매칭 성능을 줄였대 우와...
+     *
+     * 계속 작성해줘야 해서 귀찮긴 한데
+     * 데이터를 조회해오는 횟수가 현저히 적어지네요
+     */
+    public List<OrderQueryDto> findAllByDto_optimization() {
+        List<OrderQueryDto> result = findOrders();
+
+        // order에서 가져온 리스트에서 orderId만 뽑아서 리스트로 만들고
+        Map<Long, List<OrderItemQueryDto>> orderItemMap = findOrderItemMap(toOrderIds(result));
+
+        // for문 돌면서 key값으로 일치하는 걸 가져와서 넣어준다 와 이런 방법이..
+        result.forEach(o -> o.setOrderItems(orderItemMap.get(o.getOrderId())));
+
+        return result;
+    }
+
+    private Map<Long, List<OrderItemQueryDto>> findOrderItemMap(List<Long> orderIds) {
+        // 그걸 여기 파라미터 in으로 바로 넣어버리면 된다
+        List<OrderItemQueryDto> orderItems = em.createQuery("select new jpabook.jpashop.repository.order.query.OrderItemQueryDto(oi.order.id, i.name, oi.orderPrice, oi.count)" +
+                " from OrderItem oi" +
+                " join oi.item i" +
+                " where oi.order.id in :orderIds", OrderItemQueryDto.class)
+                .setParameter("orderIds", orderIds)
+                .getResultList();
+
+        // 여기서 map으로 변환한다, key는 orderId
+        Map<Long, List<OrderItemQueryDto>> orderItemMap = orderItems.stream()
+                .collect(Collectors.groupingBy(OrderItemQueryDto::getOrderId));
+        return orderItemMap;
+    }
+
+    private List<Long> toOrderIds(List<OrderQueryDto> result) {
+        List<Long> orderIds = result.stream()
+                .map(OrderQueryDto::getOrderId)
+                .collect(Collectors.toList());
+        return orderIds;
     }
 }
