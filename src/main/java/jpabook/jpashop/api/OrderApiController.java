@@ -6,6 +6,8 @@ import jpabook.jpashop.domain.OrderItem;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.order.query.OrderQueryDto;
+import jpabook.jpashop.repository.order.query.OrderQueryRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 public class OrderApiController {
 
     private final OrderRepository orderRepository;
+    private final OrderQueryRepository orderQueryRepository;
 
     /*
     흐름
@@ -102,6 +105,15 @@ public class OrderApiController {
         // 1000으로 하면 한번에 가져올 때 부하가 많이 온다...
         // 그렇다고 너무 적게 돌면 시간이 오래 걸리겠지?
         // 적정한.. 개수를 하자 (was랑 db가 순간 부하를 버틸 수 있다면 1000)
+    }
+
+    @GetMapping("/api/v4/orders")
+    public List<OrderQueryDto> ordersV4() {
+        return orderQueryRepository.findOrderQueryDtos();
+        /*
+        최초 쿼리(=루트) 1번, 컬렉션 n번 실행
+        toMany 관계는 최적화가 어려워서 별도의 메소드로 해서 조회한다~
+         */
     }
 
     @Getter
